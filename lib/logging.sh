@@ -20,7 +20,7 @@ set -eo pipefail
 # ────────────────────────────────────────────────────────────────
 
 # Log directory and file
-export LOG_DIR="$HOME/.rubinho/logs"
+export LOG_DIR="$HOME/.enterprise-scripts/logs"
 export LOG_FILE=""
 export LOG_LEVEL="${LOG_LEVEL:-INFO}"  # INFO, WARNING, ERROR, DEBUG
 
@@ -62,7 +62,7 @@ init_logging() {
     # Write log header
     {
         echo "════════════════════════════════════════════════════════════════"
-        echo "Rubinho Scripts Log"
+        echo "Enterprise Scripts Log"
         echo "Started: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "Platform: ${PLATFORM:-unknown}"
         echo "Log Level: $LOG_LEVEL"

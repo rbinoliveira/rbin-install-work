@@ -94,12 +94,12 @@ export NVM_DIR="$HOME/.nvm"
 ### Load Environment Variables
 ### -------------------------------
 
-# Try to find and load .env from rubinho-scripts using zoxide
+# Try to find and load .env from enterprise-scripts using zoxide
 if command -v zoxide &> /dev/null; then
-  RUBINHO_SCRIPTS_DIR=$(zoxide query rubinho-scripts 2>/dev/null)
-  if [ -n "$RUBINHO_SCRIPTS_DIR" ] && [ -f "$RUBINHO_SCRIPTS_DIR/.env" ]; then
+  ENTERPRISE_SCRIPTS_DIR=$(zoxide query enterprise-scripts 2>/dev/null)
+  if [ -n "$ENTERPRISE_SCRIPTS_DIR" ] && [ -f "$ENTERPRISE_SCRIPTS_DIR/.env" ]; then
     set -a
-    source "$RUBINHO_SCRIPTS_DIR/.env"
+    source "$ENTERPRISE_SCRIPTS_DIR/.env"
     set +a
   fi
 fi

@@ -1,15 +1,14 @@
-# 🌐 Rubinho Scripts
+# 🌐 Enterprise Scripts
 
 > Complete development environment configurations for **Linux** and **macOS**
 
-This repository contains **all my development environment configurations**, including:
+This repository contains **complete development environment configurations**, including:
 
 - 📝 Configuration files (dotfiles)
 - 🎨 Themes and fonts
 - ⚙️ Automated installation scripts
 - 🔧 Cursor/VS Code configurations
 - 🛠️ Auxiliary tools
-- 🏢 Separate personal and work environments
 - 🔐 Environment variables for sensitive data
 
 ---
@@ -19,8 +18,8 @@ This repository contains **all my development environment configurations**, incl
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/rubensdeoliveira/rubinho-scripts.git
-cd rubinho-scripts
+git clone <repository-url>
+cd enterprise-scripts
 ```
 
 ### 2. Configure Environment Variables (Optional)
@@ -66,27 +65,16 @@ bash 06-install-yarn.sh
 bash 07-install-tools.sh
 bash 08-install-font-jetbrains.sh
 bash 09-install-cursor.sh
+bash 10-install-claude.sh
 bash 10-configure-terminal.sh
 bash 11-configure-ssh.sh
 bash 12-configure-inotify.sh
+bash 13-install-task-master.sh
 bash 13-install-cursor-extensions.sh
 bash 14-configure-cursor.sh
 bash 15-install-docker.sh       # ⚠️ Logout/login after this
 bash 16-install-insomnia.sh
 bash 17-install-heidisql.sh
-```
-
-### Work Environment (Optional)
-
-For company-specific tools (.NET, Java, AWS, etc.):
-
-```bash
-cd work
-cp .env.example .env
-nano .env  # Fill in your company details
-
-cd linux/scripts/enviroment
-bash 00-install-all.sh
 ```
 
 ---
@@ -116,27 +104,18 @@ bash 05-install-node-nvm.sh
 bash 06-install-yarn.sh
 bash 07-install-tools.sh
 bash 08-install-font-jetbrains.sh
-bash 10-configure-ssh.sh
-bash 11-configure-file-watchers.sh
-bash 12-install-cursor-extensions.sh
-bash 13-configure-cursor.sh
+bash 09-install-cursor.sh
+bash 10-install-claude.sh
+bash 10-configure-terminal.sh
+bash 11-configure-ssh.sh
+bash 12-configure-inotify.sh
+bash 12-install-task-master.sh
+bash 13-install-cursor-extensions.sh
+bash 14-configure-cursor.sh
 bash 14-install-docker.sh
 bash 15-configure-terminal.sh
 bash 16-install-insomnia.sh
 bash 17-install-tableplus.sh
-```
-
-### Work Environment (Optional)
-
-For company-specific tools (.NET, Java, AWS, etc.):
-
-```bash
-cd work
-cp .env.example .env
-nano .env  # Fill in your company details
-
-cd macos/scripts/enviroment
-bash 00-install-all.sh
 ```
 
 ---
@@ -449,34 +428,23 @@ The scripts automatically search common development directories:
 
 ## 🔐 Environment Variables
 
-### Personal Environment
-
-Optional `.env` for personal preferences:
+Optional `.env` for environment-specific configuration:
 
 ```bash
-cd personal
-cp .env.example .env  # Optional
+cp .env.example .env
+nano .env  # Fill in your configuration details
 ```
 
-### Work Environment
-
-Required `.env` for company-specific configuration:
-
-```bash
-cd work
-cp .env.example .env  # Required
-nano .env  # Fill in your company details
-```
-
-**Work environment variables:**
+**Environment variables:**
 - `GITHUB_TOKEN` - For private repositories
 - `AWS_SSO_START_URL` - AWS SSO configuration
 - Multiple AWS accounts support
+- Git user name and email
 
 See `.env.example` for complete list.
 
 **Benefits:**
-✅ No hardcoded company information
+✅ No hardcoded sensitive information
 ✅ Easy to share with team
 ✅ Secure (gitignored)
 ✅ Works for any organization
@@ -488,7 +456,7 @@ See `.env.example` for complete list.
 ### **00-install-all.sh** (Master Script)
 Runs all installation scripts in sequence automatically.
 - Prompts for Git user name and email at the start
-- Executes scripts 01-18 (Linux) or 01-17 (macOS) in the correct order
+- Executes all scripts in the correct order (Linux and macOS have different script counts)
 - Automatically loads NVM and environment configurations during installation
 - Handles all setup phases: Initial Setup, Environment Configuration, Development Tools, and Application Setup
 - **Note:** After completion, close and reopen your terminal to ensure all configurations are applied
@@ -564,25 +532,26 @@ Installs JetBrains Mono Nerd Font.
 
 ---
 
-### **09-install-cursor.sh** (Linux only)
-Installs Cursor Editor on Linux.
-- Downloads Cursor .deb package
-- Installs via dpkg
+### **09-install-cursor.sh**
+Installs Cursor Editor.
+- **Linux**: Downloads Cursor .deb package and installs via dpkg
+- **macOS**: Installs via Homebrew Cask
 - Verifies installation
 
-### **09-configure-terminal.sh** (macOS only)
-Configures iTerm2 with Dracula theme.
-- Clones Dracula theme repository
-- Provides instructions for manual configuration
-- Sets font to JetBrainsMono Nerd Font 16pt
-- Applies Dracula color preset
+---
+
+### **10-install-claude.sh**
+Installs Claude Code CLI.
+- Installs @anthropic-ai/claude-code via npm
+- Requires Node.js/npm (script 05-install-node-nvm.sh)
+- Verifies installation
 
 ---
 
 ### **10-configure-terminal.sh** (Linux only)
 Configures GNOME Terminal with Dracula theme.
 - Installs dconf-cli
-- Creates "rubinho" profile in GNOME Terminal
+- Creates custom profile in GNOME Terminal
 - Applies Dracula theme
 - Configures JetBrains Mono Nerd Font
 - Removes old profiles
@@ -628,6 +597,22 @@ Configures inotify limits for file watching.
 - Increases `max_user_watches` to 524288
 - Makes the configuration persistent
 - Applies changes
+
+---
+
+### **12-install-task-master.sh** (macOS only)
+Installs Task Master MCP Server.
+- Installs task-master-ai globally via npm
+- Creates/updates MCP configuration in `~/.cursor/mcp.json`
+- Requires Node.js/npm (script 05-install-node-nvm.sh)
+- Provides instructions for enabling in Cursor
+
+### **13-install-task-master.sh** (Linux only)
+Installs Task Master MCP Server.
+- Installs task-master-ai globally via npm
+- Creates/updates MCP configuration in `~/.cursor/mcp.json`
+- Requires Node.js/npm (script 05-install-node-nvm.sh)
+- Provides instructions for enabling in Cursor
 
 ---
 
@@ -722,13 +707,19 @@ Installs TablePlus for macOS (alternative to HeidiSQL).
 ## 📁 Repository Structure
 
 ```
-rubinho-scripts/
+enterprise-scripts/
 ├── .gitignore               # Protects sensitive files
 ├── LICENSE                  # MIT License
 ├── readme.md                # This file
 │
 ├── .env                     # Your config (gitignored)
 ├── .env.example             # Environment config template
+│
+├── lib/                     # Shared library modules
+│   ├── env_helper.sh
+│   ├── logging.sh
+│   ├── platform.sh
+│   └── tool_detection.sh
 │
 ├── linux/                   # 🐧 Linux setup
 │   ├── config/              # Dotfiles & themes
@@ -739,21 +730,24 @@ rubinho-scripts/
 │   └── scripts/
 │       ├── enviroment/      # Setup scripts (00-23)
 │       │   ├── 00-install-all.sh
-│       │   ├── 20-install-dotnet.sh
-│       │   ├── 21-install-java.sh
-│       │   ├── 22-configure-github-token.sh
+│       │   ├── 09-install-cursor.sh
+│       │   ├── 10-install-claude.sh
+│       │   ├── 13-install-task-master.sh
 │       │   └── ...
 │       └── utils/           # Disk space tools
 │
 └── macos/                   # 🍎 macOS setup
     ├── config/              # Dotfiles & themes
+    │   ├── starship.toml
+    │   ├── user-settings.json
+    │   ├── cursor-keyboard.json
     │   └── zsh-config
     └── scripts/
         ├── enviroment/      # Setup scripts (00-23)
         │   ├── 00-install-all.sh
-        │   ├── 20-install-dotnet.sh
-        │   ├── 21-install-java.sh
-        │   ├── 22-configure-github-token.sh
+        │   ├── 09-install-cursor.sh
+        │   ├── 10-install-claude.sh
+        │   ├── 12-install-task-master.sh
         │   └── ...
         └── utils/           # Disk space tools
 ```
