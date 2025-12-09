@@ -1,0 +1,134 @@
+# ===============================
+# UNIVERSAL ZSH CONFIG (MAC + LINUX)
+# ===============================
+
+# PATH default (Linux)
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+# Add Homebrew to PATH if on macOS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Check for Apple Silicon Mac
+  if [[ -d "/opt/homebrew/bin" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+  # Check for Intel Mac
+  elif [[ -d "/usr/local/bin" ]]; then
+    export PATH="/usr/local/bin:$PATH"
+  fi
+fi
+
+# Detect OS (mac / linux)
+case "$OSTYPE" in
+  darwin*) export OS="mac";;
+  linux*)  export OS="linux";;
+esac
+
+### -------------------------------
+### ZINIT (Fast plugin manager)
+### -------------------------------
+if [[ ! -f ~/.zinit/bin/zinit.zsh ]]; then
+  mkdir -p ~/.zinit
+  git clone https://github.com/zdharma-continuum/zinit.git ~/.zinit/bin
+fi
+
+source ~/.zinit/bin/zinit.zsh
+
+### -------------------------------
+### PLUGINS (fast load)
+### -------------------------------
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-completions
+
+# Syntax highlighting MUST be last
+SYNTAX_PLUGIN="zsh-users/zsh-syntax-highlighting"
+
+### -------------------------------
+### ZOXIDE (smart cd)
+### -------------------------------
+eval "$(zoxide init zsh)"
+
+### -------------------------------
+### FZF (universal configs)
+### -------------------------------
+export FZF_DEFAULT_COMMAND='fd --type f'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d'
+
+### -------------------------------
+### ALIASES
+### -------------------------------
+alias ls='lsd'
+alias cat='bat'
+alias g='git'
+alias lg='lazygit'
+alias c='clear'
+alias reload='source ~/.zshrc && echo "🔁 zshrc reloaded!"'
+alias tm='task-master-ai'
+
+# Default Python
+alias python=python3
+alias pip=pip3
+
+### -------------------------------
+### QUALITY OF LIFE
+### -------------------------------
+setopt autocd
+setopt interactive_comments
+setopt correct
+
+### -------------------------------
+### LOAD SYNTAX HIGHLIGHTING LAST
+### -------------------------------
+zinit light $SYNTAX_PLUGIN
+
+### -------------------------------
+### NVM (Node Version Manager)
+### -------------------------------
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Other variables and tools
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+### -------------------------------
+### Load Environment Variables
+### -------------------------------
+
+# Try to find and load .env from rubinho-scripts using zoxide
+if command -v zoxide &> /dev/null; then
+  RUBINHO_SCRIPTS_DIR=$(zoxide query rubinho-scripts 2>/dev/null)
+  if [ -n "$RUBINHO_SCRIPTS_DIR" ] && [ -f "$RUBINHO_SCRIPTS_DIR/.env" ]; then
+    set -a
+    source "$RUBINHO_SCRIPTS_DIR/.env"
+    set +a
+  fi
+fi
+
+### -------------------------------
+### PYTHON + UV CONFIGURATIONS
+### -------------------------------
+# UV cache and PATH
+export UV_VENV_CLEAR=1
+export UV_CACHE_DIR="$HOME/.cache/uv"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Auto-activate .venv when entering directory
+autoload -U add-zsh-hook
+function auto_activate_venv() {
+  if [ -e ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+  fi
+}
+add-zsh-hook chpwd auto_activate_venv
+auto_activate_venv
+
+# Useful shortcuts
+alias mkvenv='uv python install 3.11.13 && uv venv --clear && source .venv/bin/activate'
+alias syncdeps='uv pip sync requirements-dev.txt'
+alias runapp='python3 -m alembic upgrade head && python3 -m app.main'
+
+
+### -------------------------------
+### STARSHIP (prompt)
+### -------------------------------
+eval "$(starship init zsh)"

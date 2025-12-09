@@ -1,0 +1,495 @@
+{
+  // ────────────────────────────────
+  // Extensões Necessárias - Instalar Todas
+  // ────────────────────────────────
+  // Core:
+  //   dbaeumer.vscode-eslint
+  //
+  // Temas e Ícones:
+  //   (Instalar manualmente: Catppuccin Theme e Symbol Icons)
+  //
+  // Frontend:
+  //   bradlc.vscode-tailwindcss
+  //
+  // Backend:
+  //   Prisma.prisma
+  //   golang.go
+  //   Shopify.ruby-lsp
+  //   hashicorp.terraform
+  //
+  // Ferramentas Externas (instalar separadamente):
+  //   Go: go install golang.org/x/tools/cmd/goimports@latest
+  //       go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+  //   Ruby: gem install rubocop
+
+  // ────────────────────────────────
+  // Editor Settings
+  // ────────────────────────────────
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+  "editor.trimAutoWhitespace": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggestSelection": "first",
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [80, 120],
+  "editor.smoothScrolling": true,
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.fontSize": 14,
+  "editor.fontFamily": "JetBrainsMono Nerd Font",
+  "editor.fontLigatures": true,
+  "editor.lineHeight": 1.6,
+  "editor.fontWeight": "400",
+  "editor.linkedEditing": true,
+  "editor.stickyScroll.enabled": true,
+
+  // ────────────────────────────────
+  // Files Settings
+  // ────────────────────────────────
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.turbo": true,
+    "**/coverage": true,
+    "**/.cache": true,
+    "**/.taskmaster": false
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.turbo/**": true,
+    "**/yarn.lock": true,
+    "**/package-lock.json": true
+  },
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.prisma": "prisma",
+    "*.tf": "terraform",
+    "*.tfvars": "terraform",
+    "*.hcl": "terraform",
+    "*.rb": "ruby",
+    "*.go": "go",
+    "*.mod": "go",
+    "*.sum": "go"
+  },
+
+  // ────────────────────────────────
+  // TypeScript Settings
+  // ────────────────────────────────
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.quoteStyle": "single",
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.paths": true,
+  "typescript.inlayHints.parameterNames.enabled": "all",
+  "typescript.inlayHints.variableTypes.enabled": true,
+  "typescript.inlayHints.propertyDeclarationTypes.enabled": true,
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "typescript.inlayHints.enumMemberValues.enabled": true,
+
+  // ────────────────────────────────
+  // JavaScript Settings
+  // ────────────────────────────────
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.quoteStyle": "single",
+  "javascript.suggest.autoImports": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.inlayHints.parameterNames.enabled": "all",
+  "javascript.inlayHints.variableTypes.enabled": true,
+  "javascript.inlayHints.propertyDeclarationTypes.enabled": true,
+  "javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+
+  // ────────────────────────────────
+  // ESLint Settings
+  // ────────────────────────────────
+  "eslint.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.format.enable": true,
+  "eslint.codeActionsOnSave.mode": "all",
+  "eslint.lintTask.enable": true,
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+
+  // ────────────────────────────────
+  // Formatter Settings (ESLint)
+  // ────────────────────────────────
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": true
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": true
+  },
+    "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": true
+    },
+    "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.formatOnSave": true
+    },
+
+  // ────────────────────────────────
+  // Tailwind CSS Settings
+  // ────────────────────────────────
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.validate": true,
+  "tailwindCSS.lint.cssConflict": "warning",
+  "tailwindCSS.lint.invalidApply": "error",
+  "tailwindCSS.lint.invalidConfigPath": "error",
+  "tailwindCSS.lint.invalidScreen": "error",
+  "tailwindCSS.lint.invalidTailwindDirective": "error",
+  "tailwindCSS.lint.invalidVariant": "error",
+  "tailwindCSS.lint.recommendedVariantOrder": "warning",
+
+  // ────────────────────────────────
+  // Next.js Settings
+  // ────────────────────────────────
+  "next.js.autocomplete": true,
+  "next.js.codeActions": true,
+  "next.js.highlight": true,
+
+  // ────────────────────────────────
+  // React Settings
+  // ────────────────────────────────
+    "emmet.includeLanguages": {
+        "typescript": "html",
+        "typescriptreact": "html"
+    },
+  "emmet.triggerExpansionOnTab": true,
+
+  // ────────────────────────────────
+  // Git Settings
+  // ────────────────────────────────
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.autofetchPeriod": 180,
+  "git.enableStatusBarSync": true,
+  "git.suggestSmartCommit": true,
+  "git.allowForcePush": false,
+  "git.autoRepositoryDetection": true,
+  "git.detectSubmodules": true,
+  "git.ignoreLimitWarning": true,
+  "git.ignoreLegacyWarning": true,
+  "git.showInlineOpenFileAction": true,
+  "git.useEditorAsCommitInput": false,
+
+  // ────────────────────────────────
+  // Terminal Settings
+  // ────────────────────────────────
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontFamily": "'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace",
+  "terminal.integrated.lineHeight": 1.4,
+  "terminal.integrated.letterSpacing": 0.5,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.smoothScrolling": true,
+  "terminal.integrated.copyOnSelection": false,
+  "terminal.integrated.rightClickBehavior": "copyPaste",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": ["-l"]
+    }
+  },
+
+  // ────────────────────────────────
+  // Search Settings
+  // ────────────────────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.turbo": true,
+    "**/coverage": true,
+    "**/yarn.lock": true,
+    "**/package-lock.json": true,
+    "**/.cache": true,
+    "**/.taskmaster/reports": false,
+    "**/.taskmaster/docs": false
+  },
+  "search.useIgnoreFiles": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.smartCase": true,
+
+  // ────────────────────────────────
+  // Workbench Settings
+  // ────────────────────────────────
+  "workbench.colorTheme": "Catppuccin Mocha",
+  "workbench.iconTheme": "symbols",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.closeOnFileDelete": true,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.startupEditor": "newUntitledFile",
+  "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.statusBar.visible": true,
+  "window.zoomLevel": 1,
+  "window.titleBarStyle": "custom",
+  "window.menuBarVisibility": "compact",
+
+  // ────────────────────────────────
+  // Extensions Settings
+  // ────────────────────────────────
+  "extensions.autoCheckUpdates": true,
+  "extensions.autoUpdate": true,
+  "extensions.ignoreRecommendations": false,
+
+  // ────────────────────────────────
+  // Prisma Settings
+  // ────────────────────────────────
+  "prisma.fileWatcher": true,
+  "prisma.showPrismaDataPlatformNotification": false,
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma",
+    "editor.formatOnSave": true
+  },
+
+  // ────────────────────────────────
+  // NestJS Settings
+  // ────────────────────────────────
+  "nestjs.autoDetect": "on",
+  "nestjs.enableCodeLens": true,
+  "nestjs.enableDebug": false,
+
+  // ────────────────────────────────
+  // Go Settings
+  // ────────────────────────────────
+  "go.useLanguageServer": true,
+  "go.formatTool": "goimports",
+  "go.lintTool": "golangci-lint",
+  "go.lintOnSave": "package",
+  "go.vetOnSave": "package",
+  "go.buildOnSave": "package",
+  "go.testOnSave": false,
+  "go.coverOnSave": false,
+  "go.useCodeSnippetsOnFunctionSuggest": true,
+  "go.useCodeSnippetsOnFunctionSuggestWithoutType": true,
+  "go.gocodeAutoBuild": false,
+  "go.gotoSymbol.includeImports": true,
+  "go.docsTool": "godoc",
+  "go.alternateTools": {
+    "go": "go"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.suggest.snippetsPreventQuickSuggestions": false
+  },
+  "[go.mod]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  },
+
+  // ────────────────────────────────
+  // Ruby Settings
+  // ────────────────────────────────
+  "ruby.useLanguageServer": true,
+  "ruby.format": "rubocop",
+  "ruby.lint": {
+    "rubocop": {
+      "useBundler": true
+    }
+  },
+  "[ruby]": {
+    "editor.defaultFormatter": "Shopify.ruby-lsp",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+
+  // ────────────────────────────────
+  // Terraform Settings
+  // ────────────────────────────────
+  "terraform.experimentalFeatures": {
+    "validateOnSave": true,
+    "prefillRequiredFields": true
+  },
+  "terraform.format.enable": true,
+  "terraform.format.onSave": true,
+  "terraform.languageServer": {
+    "enabled": true,
+    "args": []
+  },
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[hcl]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+
+  // ────────────────────────────────
+  // Node.js / Express Settings
+  // ────────────────────────────────
+  "nodejs.autoDetect": "on",
+  "nodejs.enable": true,
+  "nodejs.packageManager": "yarn",
+
+  // ────────────────────────────────
+  // Language Specific Settings
+  // ────────────────────────────────
+  "[json]": {
+    "editor.formatOnSave": false
+  },
+  "[jsonc]": {
+    "editor.formatOnSave": false
+  },
+  "[yaml]": {
+    "editor.formatOnSave": false
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.wordWrap": "on"
+  },
+  "[css]": {
+    "editor.formatOnSave": false
+  },
+  "[scss]": {
+    "editor.formatOnSave": false
+  },
+  "[html]": {
+    "editor.formatOnSave": false
+  },
+
+  // ────────────────────────────────
+  // Performance Settings
+  // ────────────────────────────────
+  "search.followSymlinks": false,
+  "typescript.disableAutomaticTypeAcquisition": false,
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.tsserver.watchOptions": {
+    "excludeDirectories": ["**/node_modules", "**/.next", "**/dist", "**/build"]
+  },
+
+  // ────────────────────────────────
+  // Accessibility Settings
+  // ────────────────────────────────
+  "editor.accessibilitySupport": "auto",
+  "editor.accessibilityPageSize": 10,
+
+  // ────────────────────────────────
+  // AI/Cursor Specific Settings
+  // ────────────────────────────────
+  "cursor.cpp.disabledLanguages": [],
+  "cursor.chat.codeGeneration.enabled": true,
+  "cursor.chat.codeGeneration.autoApply": false,
+  "workbench.panel.defaultLocation": "right",
+  "cursor.general.enableAutoSave": true,
+  "cursor.general.enableAutoFormat": true,
+
+  // ────────────────────────────────
+  // Security Settings
+  // ────────────────────────────────
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "security.workspace.trust.enabled": true,
+
+  // ────────────────────────────────
+  // Other Useful Settings
+  // ────────────────────────────────
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.filePath": "on",
+  "breadcrumbs.symbolPath": "on",
+  "outline.showFiles": true,
+  "outline.showModules": true,
+  "outline.showPackages": true,
+  "outline.showClasses": true,
+  "outline.showFunctions": true,
+  "outline.showVariables": true,
+  "problems.showCurrentInStatus": true,
+  "problems.sortOrder": "severity",
+  "scm.diffDecorations": "all",
+  "scm.diffDecorationsGutterVisibility": "always",
+  "scm.alwaysShowRepositories": true,
+  "explorer.confirmDelete": true,
+  "explorer.confirmDragAndDrop": true,
+  "explorer.compactFolders": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.js",
+    "*.tsx": "${capture}.jsx",
+    "tsconfig.json": "tsconfig.*.json",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
+    "schema.prisma": "*.env, .env.*",
+    "*.go": "${capture}_test.go",
+    "*.rb": "${capture}_spec.rb, ${capture}_test.rb",
+    "*.tf": "${capture}.tfvars, ${capture}.tfstate, ${capture}.tfstate.backup"
+  },
+
+  // ────────────────────────────────
+  // Catppuccin Theme Settings
+  // ────────────────────────────────
+  "catppuccin.accentColor": "mauve",
+  "catppuccin.bracketMode": "rainbow",
+  "catppuccin.colorOverrides": {},
+  "catppuccin.customUIColors": {},
+  "catppuccin.italicComments": true,
+  "catppuccin.italicKeywords": true,
+  "catppuccin.italicStrings": false,
+  "catppuccin.workbenchMode": "default",
+  "catppuccin.syntaxMode": "default",
+  "catppuccin.transparentBackground": false,
+  "catppuccin.stickyScroll": {
+    "dark": "#1e1e2e",
+    "light": "#eff1f5"
+  },
+  "symbols.hidesExplorerArrows": false
+}

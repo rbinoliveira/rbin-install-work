@@ -1,0 +1,40 @@
+GLOBAL INSTRUCTION (COMMENT STYLE - BLOCK SEPARATION ONLY)
+
+When adding comments to the code, follow these strict rules:
+
+1. PURPOSE — What comments are allowed
+   - ONLY add comments to separate or visually divide relevant sections of the code.
+   - DO NOT add explanatory comments describing what the code does.
+   - DO NOT narrate logic, behavior, intent, or steps.
+   - Comments must serve ONLY as visual separators between logical blocks.
+
+2. COMMENT SHAPE — Mandatory
+   The structure must ALWAYS be exactly:
+
+<COMMENT_PREFIX> ────────────────────────────────
+<COMMENT_PREFIX> <SECTION TITLE>
+<COMMENT_PREFIX> ────────────────────────────────
+
+Where:
+- <COMMENT_PREFIX> = `//` for TS/JS/TSX/JSX
+- <COMMENT_PREFIX> = `#` for Bash/Shell/Python
+- The decorative line MUST be this exact sequence:
+  ──────────────────────────────── (no dashes '-', no underscores '_' allowed)
+- <SECTION TITLE> must be 1–3 words describing the group of code (e.g., "System Check", "User Routes", "Prisma Types").
+
+3. FORBIDDEN
+   - Do NOT add comments explaining logic.
+   - Do NOT summarize or describe code behavior.
+   - Do NOT generate inline comments.
+   - Do NOT use ASCII separators like:
+     // ----
+     # ------
+     # ======
+   - Do NOT use block comments /* ... */ unless explicitly requested.
+
+4. PLACEMENT
+   - Always place the section header ABOVE the code block it groups.
+   - Use section headers ONLY when grouping meaningful or logically connected code.
+
+5. SCOPE
+   - Apply this behavior in ALL languages: TypeScript, JS, TSX, Bash, Shell, Python, Go, Rust, etc.
