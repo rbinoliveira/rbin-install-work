@@ -144,6 +144,14 @@ for script in "${scripts_phase1[@]}"; do
   echo "Running: $script"
   echo "=============================================="
 
+  # Smart mode: check if already installed
+  if [ "$INSTALL_MODE" = "smart" ]; then
+    if check_script_installed "$script"; then
+      echo "✓ $script is already installed/configured. Skipping..."
+      continue
+    fi
+  fi
+
   # Always ask user if they want to run/install
   if [ -t 0 ]; then  # Check if running interactively
     read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
@@ -194,6 +202,14 @@ for script in "${scripts_phase2[@]}"; do
   echo ""
   echo "Running: $script"
   echo "=============================================="
+
+  # Smart mode: check if already installed
+  if [ "$INSTALL_MODE" = "smart" ]; then
+    if check_script_installed "$script"; then
+      echo "✓ $script is already installed/configured. Skipping..."
+      continue
+    fi
+  fi
 
   # Always ask user if they want to run/install
   if [ -t 0 ]; then  # Check if running interactively
@@ -247,6 +263,14 @@ for script in "${scripts[@]}"; do
   echo ""
   echo "Running: $script"
   echo "=============================================="
+
+  # Smart mode: check if already installed
+  if [ "$INSTALL_MODE" = "smart" ]; then
+    if check_script_installed "$script"; then
+      echo "✓ $script is already installed/configured. Skipping..."
+      continue
+    fi
+  fi
 
   # Always ask user if they want to run/install
   if [ -t 0 ]; then  # Check if running interactively
@@ -316,6 +340,14 @@ for script in "${scripts[@]}"; do
   echo ""
   echo "Running: $script"
   echo "=============================================="
+
+  # Smart mode: check if already installed
+  if [ "$INSTALL_MODE" = "smart" ]; then
+    if check_script_installed "$script"; then
+      echo "✓ $script is already installed/configured. Skipping..."
+      continue
+    fi
+  fi
 
   # Always ask user if they want to run/install
   if [ -t 0 ]; then  # Check if running interactively

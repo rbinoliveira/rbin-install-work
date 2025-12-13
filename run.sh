@@ -20,6 +20,52 @@ echo "╚═══════════════════════�
 echo ""
 
 # ────────────────────────────────
+# Installation Mode Selection
+# ────────────────────────────────
+
+select_installation_mode() {
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🔧 Installation Mode Selection"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Choose the installation mode:"
+    echo ""
+    echo "  1) 🧠 Smart Mode - Installs only what's missing"
+    echo "     Automatically skips tools that are already installed"
+    echo ""
+    echo "  2) 🎯 Interactive Mode - Manual selection"
+    echo "     You choose what to install for each tool"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    while true; do
+        read -p "Select mode [1/2] (default: 2): " -n 1 -r
+        echo ""
+
+        if [[ -z "$REPLY" ]] || [[ "$REPLY" == "2" ]]; then
+            export INSTALL_MODE="interactive"
+            echo ""
+            echo "✓ Selected: Interactive Mode"
+            echo ""
+            break
+        elif [[ "$REPLY" == "1" ]]; then
+            export INSTALL_MODE="smart"
+            echo ""
+            echo "✓ Selected: Smart Mode"
+            echo "  The script will automatically skip already installed tools."
+            echo ""
+            break
+        else
+            echo "❌ Invalid option. Please enter 1 or 2."
+            echo ""
+        fi
+    done
+}
+
+select_installation_mode
+
+# ────────────────────────────────
 # Environment Variables Setup
 # ────────────────────────────────
 
@@ -321,3 +367,183 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Installation completed!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# ────────────────────────────────
+# Final Instructions
+# ────────────────────────────────
+
+print_final_instructions() {
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📋 Next Steps - Important Instructions"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    # 1. Restart Terminal
+    echo "1️⃣  RESTART YOUR TERMINAL"
+    echo "   ⚠️  This is REQUIRED for all configurations to take effect!"
+    echo "   → Close this terminal window completely"
+    echo "   → Open a new terminal window"
+    echo "   → Or run: source ~/.zshrc"
+    echo ""
+
+    # 2. SSH Key Configuration
+    if [ -f "$HOME/.ssh/id_ed25519.pub" ]; then
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "2️⃣  CONFIGURE SSH KEY ON GITHUB"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "   ✅ Your SSH public key has been generated!"
+        echo ""
+        echo "   📋 Your SSH Public Key:"
+        echo "   ────────────────────────────────────────────────────────────"
+        cat "$HOME/.ssh/id_ed25519.pub" | sed 's/^/   /'
+        echo "   ────────────────────────────────────────────────────────────"
+        echo ""
+        echo "   📝 Steps to add it to GitHub:"
+        echo ""
+        echo "   1. Copy your SSH public key (command below):"
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo "      cat ~/.ssh/id_ed25519.pub | pbcopy"
+        else
+            echo "      cat ~/.ssh/id_ed25519.pub | xclip -sel clip"
+            echo "      (or manually copy the key shown above)"
+        fi
+        echo ""
+        echo "   2. Go to GitHub Settings:"
+        echo "      https://github.com/settings/keys"
+        echo ""
+        echo "   3. Click 'New SSH key'"
+        echo ""
+        echo "   4. Add a title (e.g., 'My Development Machine')"
+        echo ""
+        echo "   5. Paste your public key and click 'Add SSH key'"
+        echo ""
+        echo "   ✅ Test SSH connection (after adding to GitHub):"
+        echo "      ssh -T git@github.com"
+        echo ""
+        echo "   💡 Expected output: 'Hi username! You've successfully authenticated...'"
+        echo ""
+    else
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "2️⃣  CONFIGURE SSH KEY (Optional)"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "   If you need to configure SSH for GitHub, run:"
+        echo "   bash $SCRIPT_DIR/$PLATFORM/scripts/enviroment/12-configure-ssh.sh"
+        echo ""
+    fi
+
+    # 3. GitHub Token
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "3️⃣  GITHUB TOKEN (For Private Repositories)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "   If you need access to private GitHub repositories:"
+    echo ""
+    echo "   1. Generate a token:"
+    echo "      https://github.com/settings/tokens"
+    echo ""
+    echo "   2. Click 'Generate new token' → 'Generate new token (classic)'"
+    echo ""
+    echo "   3. Select scope: 'repo' (for private repositories)"
+    echo ""
+    echo "   4. Configure it:"
+    echo "      bash $SCRIPT_DIR/$PLATFORM/scripts/enviroment/22-configure-github-token.sh"
+    echo ""
+    echo "   Or add manually to ~/.zshrc:"
+    echo "      export GITHUB_TOKEN=your_token_here"
+    echo ""
+
+    # 4. AWS SSO Configuration
+    if [ -f "$SCRIPT_DIR/.env" ]; then
+        if grep -q "AWS_SSO_START_URL" "$SCRIPT_DIR/.env" 2>/dev/null; then
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "4️⃣  AWS SSO CONFIGURATION"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            echo "   Your AWS SSO is configured. To login:"
+            echo ""
+            echo "   aws sso login"
+            echo ""
+            echo "   📝 Verify AWS configuration:"
+            echo "      aws sts get-caller-identity"
+            echo ""
+        fi
+    fi
+
+    # 5. Docker (Linux specific)
+    if [ "$PLATFORM" = "linux" ]; then
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "5️⃣  DOCKER CONFIGURATION (Linux)"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "   ⚠️  To use Docker without sudo, you need to:"
+        echo "      → Logout and login again"
+        echo "      → Or restart your session"
+        echo ""
+        echo "   ✅ Verify Docker:"
+        echo "      docker --version"
+        echo "      docker ps"
+        echo ""
+    fi
+
+    # 6. Verify Installations
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "6️⃣  VERIFY INSTALLATIONS"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "   After restarting your terminal, verify:"
+    echo ""
+    echo "   # Git"
+    echo "   git --version"
+    echo "   git config --global user.name"
+    echo "   git config --global user.email"
+    echo ""
+    echo "   # Node.js & Yarn"
+    echo "   node -v"
+    echo "   npm -v"
+    echo "   yarn -v"
+    echo ""
+    echo "   # Shell & Tools"
+    echo "   zsh --version"
+    echo "   starship --version"
+    echo "   nvm --version"
+    echo ""
+    if [ "$PLATFORM" = "linux" ]; then
+        echo "   # Docker"
+        echo "   docker --version"
+        echo ""
+    fi
+    echo "   # AWS CLI"
+    echo "   aws --version"
+    echo ""
+
+    # 7. Additional Resources
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "7️⃣  ADDITIONAL RESOURCES"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "   📚 Documentation:"
+    echo "      See README.md for detailed information"
+    echo ""
+    echo "   🔧 Troubleshooting:"
+    echo "      - If tools are not found, restart terminal"
+    echo "      - Check ~/.zshrc for environment variables"
+    echo "      - Verify .env file configuration"
+    echo ""
+    echo "   💡 Tips:"
+    echo "      - Use 'nvm use 22' to activate Node.js 22"
+    echo "      - Starship prompt will appear after restart"
+    echo "      - Zinit plugins load automatically"
+    echo ""
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🎉 Setup Complete!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "   Remember: RESTART YOUR TERMINAL before continuing!"
+    echo ""
+}
+
+print_final_instructions
