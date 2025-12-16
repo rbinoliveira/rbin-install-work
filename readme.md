@@ -169,13 +169,7 @@ Configures SSH for Git.
 #### **12-configure-inotify.sh** (Linux only)
 Configures inotify limits for file watching.
 
-#### **12-install-task-master.sh** (macOS only)
-Installs Task Master MCP Server.
-
-#### **13-install-task-master.sh** (Linux only)
-Installs Task Master MCP Server.
-
-#### **14-configure-cursor.sh**
+#### **15-configure-cursor.sh**
 Applies Cursor configurations.
 - Downloads settings from remote repository
 - Configures theme and preferences
@@ -436,13 +430,7 @@ Configura SSH para Git.
 #### **12-configure-inotify.sh** (Apenas Linux)
 Configura limites do inotify para monitoramento de arquivos.
 
-#### **12-install-task-master.sh** (Apenas macOS)
-Instala o servidor MCP Task Master.
-
-#### **13-install-task-master.sh** (Apenas Linux)
-Instala o servidor MCP Task Master.
-
-#### **14-configure-cursor.sh**
+#### **15-configure-cursor.sh**
 Aplica configurações do Cursor.
 - Baixa configurações do repositório remoto
 - Configura tema e preferências

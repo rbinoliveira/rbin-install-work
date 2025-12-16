@@ -94,9 +94,6 @@ check_script_installed() {
             # Configuration script, always run
             return 1
             ;;
-        "14-install-task-master.sh")
-            check_installed "task-master-ai" || return 1
-            ;;
         "15-configure-cursor.sh")
             # Configuration script, always run
             return 1

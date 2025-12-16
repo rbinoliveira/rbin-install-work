@@ -3,7 +3,7 @@
 #
 # Tool Installation Module
 #
-# Handles installation of Task Master, Claude Code, and Cursor configuration
+# Handles installation of Claude Code and Cursor configuration
 # with API key prompts and validation.
 #
 # Usage:
@@ -160,34 +160,6 @@ install_node_npm() {
     log_info "Node.js installed successfully"
 }
 
-install_task_master() {
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "Installing Task Master AI"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-    # Check if already installed
-    if [ "$TASK_MASTER_INSTALLED" = "true" ]; then
-        if ! prompt_reinstall_if_needed "Task Master" "TASK_MASTER_INSTALLED" "TASK_MASTER_VERSION"; then
-            return 0
-        fi
-    fi
-
-    # Install via npm
-    echo "Installing task-master-ai via npm..."
-    log_info "Installing task-master-ai"
-
-    if npm install -g task-master-ai; then
-        echo "✓ Task Master AI installed successfully"
-        log_info "Task Master AI installed successfully"
-        return 0
-    else
-        echo "✗ Failed to install Task Master AI"
-        log_error "Failed to install Task Master AI"
-        return 1
-    fi
-}
-
 install_claude() {
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -259,8 +231,6 @@ configure_cursor() {
     echo "✓ Cursor IDE detected"
     echo ""
     echo "Cursor configuration:"
-    echo "  • Task Master MCP will be configured via Cursor settings"
-    echo "  • Open Cursor → Settings → MCP to enable Task Master"
     echo "  • API keys can be configured in Cursor's AI settings"
     echo ""
 
@@ -279,7 +249,6 @@ install_all_tools() {
     echo ""
     echo "This will install and configure:"
     echo "  • Node.js and npm (if not already installed)"
-    echo "  • Task Master AI"
     echo "  • Claude Code CLI"
     echo "  • Cursor IDE configuration"
     echo ""
@@ -298,7 +267,6 @@ install_all_tools() {
 
     # Track results
     local node_success=false
-    local task_master_success=false
     local claude_success=false
     local cursor_configured=false
 
@@ -309,11 +277,6 @@ install_all_tools() {
 
     # Run tool detection to get current state
     detect_all_tools
-
-    # Install Task Master
-    if install_task_master; then
-        task_master_success=true
-    fi
 
     # Install Claude
     if install_claude; then
@@ -336,12 +299,6 @@ install_all_tools() {
         echo "✓ Node.js and npm"
     else
         echo "✗ Node.js and npm (failed or skipped)"
-    fi
-
-    if [ "$task_master_success" = true ]; then
-        echo "✓ Task Master AI"
-    else
-        echo "✗ Task Master AI (failed or skipped)"
     fi
 
     if [ "$claude_success" = true ]; then
@@ -374,7 +331,6 @@ export -f prompt_api_key
 export -f validate_anthropic_key
 export -f create_or_update_env
 export -f install_node_npm
-export -f install_task_master
 export -f install_claude
 export -f configure_cursor
 export -f install_all_tools

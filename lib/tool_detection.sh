@@ -3,14 +3,14 @@
 #
 # Tool Detection Module
 #
-# Detects whether Task Master, Claude, and Cursor are already installed
+# Detects whether Claude and Cursor are already installed
 # on the system and stores detection results for use by installation handlers.
 #
 # Usage:
 #   source lib/tool_detection.sh
 #   detect_all_tools
-#   if [ "$TASK_MASTER_INSTALLED" = "true" ]; then
-#     echo "Task Master is installed: $TASK_MASTER_VERSION"
+#   if [ "$CLAUDE_INSTALLED" = "true" ]; then
+#     echo "Claude is installed: $CLAUDE_VERSION"
 #   fi
 #
 
@@ -21,44 +21,6 @@ if [ -z "$PLATFORM" ]; then
     echo "ERROR: Platform detection must be sourced before tool detection" >&2
     return 1 2>/dev/null || exit 1
 fi
-
-# ────────────────────────────────────────────────────────────────
-# Task Master Detection
-# ────────────────────────────────────────────────────────────────
-
-detect_task_master() {
-    export TASK_MASTER_INSTALLED="false"
-    export TASK_MASTER_VERSION="unknown"
-    export TASK_MASTER_PATH=""
-
-    # Check if task-master command is available
-    if command -v task-master &> /dev/null; then
-        export TASK_MASTER_PATH="$(command -v task-master)"
-
-        # Try to get version
-        if task-master --version &> /dev/null; then
-            local version_output
-            version_output="$(task-master --version 2>&1 | head -1)"
-            export TASK_MASTER_VERSION="$version_output"
-            export TASK_MASTER_INSTALLED="true"
-        else
-            # Command exists but version check failed - might be partially installed
-            export TASK_MASTER_VERSION="unknown (command found but version check failed)"
-            export TASK_MASTER_INSTALLED="partial"
-        fi
-    fi
-
-    # Also check npm global packages if available
-    if [ "$TASK_MASTER_INSTALLED" = "false" ] && command -v npm &> /dev/null; then
-        if npm list -g task-master-ai &> /dev/null; then
-            local npm_version
-            npm_version="$(npm list -g task-master-ai 2>&1 | grep task-master-ai | head -1)"
-            export TASK_MASTER_VERSION="$npm_version"
-            export TASK_MASTER_INSTALLED="true"
-            export TASK_MASTER_PATH="npm global"
-        fi
-    fi
-}
 
 # ────────────────────────────────────────────────────────────────
 # Claude Code Detection
@@ -183,7 +145,6 @@ detect_cursor() {
 # ────────────────────────────────────────────────────────────────
 
 detect_all_tools() {
-    detect_task_master
     detect_claude
     detect_cursor
 }
@@ -197,16 +158,6 @@ print_detection_summary() {
     echo "Tool Detection Summary"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-
-    # Task Master
-    echo -n "Task Master AI: "
-    if [ "$TASK_MASTER_INSTALLED" = "true" ]; then
-        echo "✓ Installed ($TASK_MASTER_VERSION)"
-    elif [ "$TASK_MASTER_INSTALLED" = "partial" ]; then
-        echo "⚠ Partially installed (needs repair)"
-    else
-        echo "✗ Not installed"
-    fi
 
     # Claude
     echo -n "Claude Code:    "
@@ -294,7 +245,6 @@ prompt_reinstall_if_needed() {
 }
 
 # Export functions for use in other scripts
-export -f detect_task_master
 export -f detect_claude
 export -f detect_cursor
 export -f detect_all_tools

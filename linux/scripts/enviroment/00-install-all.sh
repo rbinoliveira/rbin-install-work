@@ -328,7 +328,6 @@ scripts=(
   "11-configure-terminal.sh"
   "12-configure-ssh.sh"
   "13-configure-inotify.sh"
-  "14-install-task-master.sh"
   "15-configure-cursor.sh"
   "16-install-docker.sh"
   "17-install-aws-vpn-client.sh"
