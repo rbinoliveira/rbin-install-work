@@ -101,10 +101,6 @@ rotate_logs() {
 sanitize_for_logging() {
     local message="$1"
 
-    # Remove API keys (patterns like sk-*, ANTHROPIC_API_KEY=*, etc.)
-    message=$(echo "$message" | sed -E 's/sk-[a-zA-Z0-9_-]{20,}/[API_KEY_REDACTED]/g')
-    message=$(echo "$message" | sed -E 's/(API_KEY|TOKEN|PASSWORD|SECRET)[=:][^ ]*/\1=[REDACTED]/gi')
-
     # Sanitize home directory paths (replace with ~)
     message=$(echo "$message" | sed "s|$HOME|~|g")
 
