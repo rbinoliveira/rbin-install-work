@@ -29,7 +29,7 @@ source "$ENV_FILE"
 set +a
 
 echo "=============================================="
-echo "===== [22] CONFIGURING GITHUB TOKEN =========="
+echo "===== [21] CONFIGURING GITHUB TOKEN =========="
 echo "=============================================="
 
 echo "This script will help you configure the GITHUB_TOKEN"
@@ -47,6 +47,14 @@ elif [ -n "$GITHUB_TOKEN" ] && [ "$GITHUB_TOKEN" != "skip" ]; then
 else
     # Check if already in .zshrc
     if grep -q "GITHUB_TOKEN" ~/.zshrc 2>/dev/null; then
+        # In smart mode, skip if already configured
+        if [ "$INSTALL_ACTION" = "smart" ]; then
+            echo "✓ GITHUB_TOKEN is already configured in ~/.zshrc. Skipping."
+            echo "=============================================="
+            echo "============== [21] DONE ===================="
+            echo "=============================================="
+            exit 0
+        fi
         echo "⚠️  GITHUB_TOKEN is already configured in ~/.zshrc"
         read -p "Do you want to update it? (y/N): " -n 1 -r
         echo
@@ -57,6 +65,17 @@ else
         # Remove old GITHUB_TOKEN line
         sed -i.bak '/GITHUB_TOKEN/d' ~/.zshrc
     fi
+    
+    # In smart mode, if no token provided, skip
+    if [ "$INSTALL_ACTION" = "smart" ] && [ -z "$GITHUB_TOKEN" ]; then
+        echo "⚠️  GITHUB_TOKEN not provided. Skipping configuration."
+        echo "   You can configure it later by running this script manually."
+        echo "=============================================="
+        echo "============== [21] SKIPPED ================="
+        echo "=============================================="
+        exit 0
+    fi
+    
     echo ""
     echo "📝 To get a GitHub token:"
     echo "   1. Go to: https://github.com/settings/tokens"
@@ -100,7 +119,7 @@ echo "   - Keep your token secure and don't share it"
 echo ""
 
 echo "=============================================="
-echo "============== [22] DONE ===================="
+echo "============== [21] DONE ===================="
 echo "=============================================="
 echo "🎉 GitHub token configuration complete!"
 echo ""

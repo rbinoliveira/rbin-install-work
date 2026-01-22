@@ -14,315 +14,137 @@ if [ -f "$SCRIPT_DIR/lib/aws_helper.sh" ]; then
     source "$SCRIPT_DIR/lib/aws_helper.sh"
 fi
 
+# Load check_installed functions
+if [ -f "$SCRIPT_DIR/lib/check_installed.sh" ]; then
+    source "$SCRIPT_DIR/lib/check_installed.sh"
+fi
+
+# Load environment validator library
+if [ -f "$SCRIPT_DIR/lib/env_validator.sh" ]; then
+    source "$SCRIPT_DIR/lib/env_validator.sh"
+fi
+
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         🚀 Enterprise Scripts - Interactive Launcher 🚀         ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
 
 # ────────────────────────────────
-# Installation Mode Selection
+# Installation Action Selection (First Menu)
 # ────────────────────────────────
 
-select_installation_mode() {
+select_installation_action() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🔧 Installation Mode Selection"
+    echo "🚀 Installation Action Selection"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    echo "Choose the installation mode:"
+    echo "Choose what you want to do:"
     echo ""
-    echo "  1) 🧠 Smart Mode - Installs only what's missing"
+    echo "  1) 🧠 Smart Install"
+    echo "     Installs only what's missing"
     echo "     Automatically skips tools that are already installed"
     echo ""
-    echo "  2) 🎯 Interactive Mode - Manual selection"
-    echo "     You choose what to install for each tool"
+    echo "  2) 🔄 Reinstall All"
+    echo "     Reinstalls everything from scratch"
+    echo "     Useful for updating or fixing issues"
+    echo ""
+    echo "  3) 🎯 Select What to Run"
+    echo "     Choose specific scripts to run"
+    echo "     You'll see a list and select by number (e.g., 1,2,3)"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
     while true; do
-        read -p "Select mode [1/2] (default: 2): " -n 1 -r
+        read -p "Select action [1/2/3] (default: 1): " -n 1 -r
         echo ""
 
-        if [[ -z "$REPLY" ]] || [[ "$REPLY" == "2" ]]; then
-            export INSTALL_MODE="interactive"
-            echo ""
-            echo "✓ Selected: Interactive Mode"
-            echo ""
-            break
-        elif [[ "$REPLY" == "1" ]]; then
+        if [[ -z "$REPLY" ]] || [[ "$REPLY" == "1" ]]; then
+            export INSTALL_ACTION="smart"
             export INSTALL_MODE="smart"
             echo ""
-            echo "✓ Selected: Smart Mode"
-            echo "  The script will automatically skip already installed tools."
+            echo "✓ Selected: Smart Install"
+            echo ""
+            break
+        elif [[ "$REPLY" == "2" ]]; then
+            export INSTALL_ACTION="reinstall"
+            export INSTALL_MODE="interactive"
+            echo ""
+            echo "✓ Selected: Reinstall All"
+            echo ""
+            break
+        elif [[ "$REPLY" == "3" ]]; then
+            export INSTALL_ACTION="select"
+            export INSTALL_MODE="interactive"
+            echo ""
+            echo "✓ Selected: Select What to Run"
             echo ""
             break
         else
-            echo "❌ Invalid option. Please enter 1 or 2."
+            echo "❌ Invalid option. Please enter 1, 2, or 3."
             echo ""
         fi
     done
 }
 
-select_installation_mode
+select_installation_action
 
 # ────────────────────────────────
-# Environment Variables Setup
+# Request Sudo Password Once
 # ────────────────────────────────
 
-setup_environment_variables() {
+request_sudo_password() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⚙️  Environment Configuration"
+    echo "🔐 Administrator Password Required"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
+    echo "Some installation steps require administrator privileges."
+    echo "Please enter your password once. It will be cached for this session."
+    echo ""
+    
+    # Request sudo password and cache it
+    sudo -v
+    
+    # Keep sudo alive by refreshing it every 5 minutes in background
+    (while true; do
+        sleep 300
+        sudo -n true 2>/dev/null || exit 1
+    done) &
+    
+    echo "✓ Administrator privileges granted"
+    echo ""
+}
 
-    # Check if .env exists, if not create empty file
+# Request sudo password once at the beginning
+request_sudo_password
+
+# ────────────────────────────────
+# Complete Environment Variables Setup
+# ────────────────────────────────
+
+setup_complete_environment() {
     local env_file="$SCRIPT_DIR/.env"
     local env_example="$SCRIPT_DIR/.env.example"
 
-    if [ ! -f "$env_file" ]; then
-        echo "📝 Creating new .env file..."
-        touch "$env_file"
-        echo "✓ Created empty .env file"
-        if [ -f "$env_example" ]; then
-            echo ""
-            echo "💡 Tip: You can use .env.example as a reference:"
-            echo "   cat $env_example"
-            echo ""
-        fi
+    # Use the shared validation library
+    if ! validate_required_env_variables "$env_file" "$env_example"; then
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "❌ Environment validation failed!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "Installation cannot proceed without required variables."
+        echo "Please check your .env file: $env_file"
+        echo ""
+        exit 1
     fi
 
-    # Show current .env file contents
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📄 Current .env file contents:"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-
-    if [ -s "$env_file" ]; then
-        # Show contents with line numbers and highlight empty/commented lines
-        local line_num=1
-        while IFS= read -r line || [ -n "$line" ]; do
-            if [[ "$line" =~ ^[[:space:]]*# ]]; then
-                printf "  %3d: %s\n" "$line_num" "$line"
-            elif [[ -z "${line// }" ]]; then
-                printf "  %3d: (empty line)\n" "$line_num"
-            else
-                # Mask sensitive values (tokens, keys, etc)
-                local masked_line="$line"
-                if [[ "$line" =~ ^[[:space:]]*(GITHUB_TOKEN|AWS_.*_KEY|.*TOKEN|.*SECRET|.*PASSWORD)[[:space:]]*= ]]; then
-                    masked_line=$(echo "$line" | sed 's/=.*/=***HIDDEN***/')
-                fi
-                printf "  %3d: %s\n" "$line_num" "$masked_line"
-            fi
-            ((line_num++))
-        done < "$env_file"
-    else
-        echo "  (file is empty)"
-    fi
-
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-
-    # Ask if user wants to continue with current .env or edit it
-    local edited_env=false
-    read -p "Is the .env file correct? Continue? [Y/n]: " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-        echo ""
-        echo "Opening .env file for editing..."
-        echo "  File location: $env_file"
-        echo ""
-
-        # Try to use common editors
-        if command -v nano &> /dev/null; then
-            nano "$env_file"
-        elif command -v vim &> /dev/null; then
-            vim "$env_file"
-        elif command -v vi &> /dev/null; then
-            vi "$env_file"
-        else
-            echo "⚠️  No text editor found (nano, vim, vi)"
-            echo "   Please edit the file manually: $env_file"
-            echo ""
-            read -p "Press Enter after editing the file..."
-        fi
-
-        echo ""
-        echo "✓ .env file updated"
-        echo ""
-        edited_env=true
-    else
-        echo "✓ Continuing with current .env file"
-        echo ""
-    fi
-
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "Checking required environment variables..."
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-
-    # Variables that might be needed for installation
-    local required_vars=(
-        "GIT_USER_NAME:Your Git user name (for Git commits):true"
-        "GIT_USER_EMAIL:Your Git user email (for Git commits):true"
-    )
-
-
-    # Check required variables
-    for var_info in "${required_vars[@]}"; do
-        IFS=':' read -r var_name prompt_text is_required <<< "$var_info"
-
-        # Check if variable exists in .env
-        local value
-        if [ -f "$env_file" ]; then
-            # Try to read from .env
-            while IFS= read -r line || [ -n "$line" ]; do
-                # Skip comments and empty lines
-                [[ "$line" =~ ^[[:space:]]*# ]] && continue
-                [[ -z "${line// }" ]] && continue
-
-                # Check if this line matches our variable
-                if [[ "$line" =~ ^[[:space:]]*${var_name}[[:space:]]*=[[:space:]]*(.+)$ ]]; then
-                    value="${BASH_REMATCH[1]}"
-                    # Remove quotes if present
-                    value="${value#\"}"
-                    value="${value%\"}"
-                    value="${value#\'}"
-                    value="${value%\'}"
-                    # Remove leading/trailing whitespace
-                    value="${value#"${value%%[![:space:]]*}"}"
-                    value="${value%"${value##*[![:space:]]}"}"
-                    break
-                fi
-            done < "$env_file"
-        fi
-
-        # If not found or empty (after removing quotes and spaces), prompt user
-        if [ -z "${value// }" ] || [ -z "$value" ]; then
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "📝 Missing Required Variable: $var_name"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo ""
-            echo "$prompt_text"
-            echo ""
-
-            while true; do
-                read -p "Enter value for $var_name: " user_input
-
-                if [ -z "$user_input" ]; then
-                    if [ "$is_required" = "true" ]; then
-                        echo "❌ Error: $var_name is required and cannot be empty."
-                        echo "   Please enter a value."
-                        echo ""
-                        continue
-                    else
-                        echo "⚠️  No value provided. Skipping..."
-                        echo ""
-                        break
-                    fi
-                else
-                    # Save to .env
-                    if grep -q "^[[:space:]]*${var_name}[[:space:]]*=" "$env_file" 2>/dev/null; then
-                        # Update existing line
-                        if [[ "$OSTYPE" == "darwin"* ]]; then
-                            sed -i '' "s|^[[:space:]]*${var_name}[[:space:]]*=.*|${var_name}=\"${user_input}\"|" "$env_file"
-                        else
-                            sed -i "s|^[[:space:]]*${var_name}[[:space:]]*=.*|${var_name}=\"${user_input}\"|" "$env_file"
-                        fi
-                    else
-                        # Append new line
-                        echo "${var_name}=\"${user_input}\"" >> "$env_file"
-                    fi
-
-                    echo "✓ Saved $var_name to .env file"
-                    echo ""
-                    break
-                fi
-            done
-        else
-            echo "✓ Found $var_name in .env file (using existing value)"
-        fi
-    done
-
-
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "✅ Environment configuration complete"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-
-    # Check for AWS Account variables
-    check_aws_account_variables
+    # Load environment variables
+    load_env_file "$env_file"
 }
 
-# ────────────────────────────────
-# Check AWS Account Variables
-# ────────────────────────────────
-
-check_aws_account_variables() {
-    local env_file="$SCRIPT_DIR/.env"
-
-    # Check if AWS account variables exist using library function
-    if has_aws_account_variables "$env_file"; then
-        return 0
-    fi
-
-    # If no AWS account variables found, suggest getting them
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "☁️  AWS Account Variables Not Found"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "No AWS account variables (AWS_ACCOUNT_*_ID) found in .env file."
-    echo ""
-
-    # Check if AWS config exists
-    if [ -f "$HOME/.aws/config" ]; then
-        echo "📋 We can extract AWS account information from your AWS configuration."
-        echo ""
-
-        read -p "Do you want to see your AWS variables now? [Y/n]: " -n 1 -r
-        echo ""
-        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-            echo ""
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "📋 Your AWS Variables (copy and paste to .env):"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo ""
-
-            # Use library function to get AWS variables
-            get_aws_env_variables
-
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo ""
-            echo "💡 To add these to your .env file automatically, run:"
-            echo "   get_aws_env_variables >> $env_file"
-            echo ""
-
-            read -p "Do you want to add these variables to .env now? [y/N]: " -n 1 -r
-            echo ""
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                get_aws_env_variables >> "$env_file"
-                echo "✓ AWS variables added to .env file"
-            fi
-
-            echo ""
-            read -p "Press Enter to continue..."
-        fi
-    else
-        echo "⚠️  AWS configuration file (~/.aws/config) not found."
-        echo ""
-        echo "To configure AWS SSO, run:"
-        echo "   bash $SCRIPT_DIR/linux/scripts/enviroment/18-configure-aws-sso.sh"
-        echo ""
-        echo "Or for macOS:"
-        echo "   bash $SCRIPT_DIR/macos/scripts/enviroment/18-configure-aws-sso.sh"
-        echo ""
-    fi
-    echo ""
-}
-
-# Setup environment variables before installation
-setup_environment_variables
+# Setup complete environment before installation
+setup_complete_environment
 
 # ────────────────────────────────
 # Platform Detection
@@ -343,8 +165,131 @@ echo ""
 print_platform_info
 echo ""
 
+
 # ────────────────────────────────
-# Run Installation Script
+# Get All Available Scripts
+# ────────────────────────────────
+
+get_all_scripts() {
+    local platform_dir="$SCRIPT_DIR/$PLATFORM/scripts/enviroment"
+    local scripts=()
+    
+    # Get all scripts from 00-install-all.sh by extracting from script arrays
+    if [ -f "$platform_dir/00-install-all.sh" ]; then
+        # Extract all script names from arrays (scripts_phase1, scripts_phase2, scripts)
+        while IFS= read -r line; do
+            # Match lines like: "01-configure-git.sh" or "09-install-cursor.sh"
+            if [[ "$line" =~ \"([0-9]+-[^\"]+\.sh)\" ]]; then
+                scripts+=("${BASH_REMATCH[1]}")
+            fi
+        done < <(grep -E '^[[:space:]]+"[0-9]+-.*\.sh"' "$platform_dir/00-install-all.sh")
+    fi
+    
+    # If no scripts found, try to list files directly
+    if [ ${#scripts[@]} -eq 0 ]; then
+        for script in "$platform_dir"/*.sh; do
+            if [ -f "$script" ]; then
+                local basename_script=$(basename "$script")
+                if [[ "$basename_script" =~ ^[0-9]+- ]]; then
+                    scripts+=("$basename_script")
+                fi
+            fi
+        done
+    fi
+    
+    # Remove duplicates and sort
+    local unique_scripts=($(printf '%s\n' "${scripts[@]}" | sort -u))
+    
+    # Output as space-separated string
+    echo "${unique_scripts[@]}"
+}
+
+# ────────────────────────────────
+# Select Scripts to Run
+# ────────────────────────────────
+
+select_scripts_to_run() {
+    local platform_dir="$SCRIPT_DIR/$PLATFORM/scripts/enviroment"
+    local all_scripts=($(get_all_scripts))
+    local selected_scripts=()
+    
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📋 Available Scripts"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    local index=1
+    for script in "${all_scripts[@]}"; do
+        local script_name=$(echo "$script" | sed 's/^[0-9]*-//;s/\.sh$//' | tr '-' ' ' | sed 's/\b\(.\)/\u\1/g')
+        printf "  %2d) %s\n" "$index" "$script"
+        ((index++))
+    done
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Enter the numbers of scripts you want to run, separated by commas."
+    echo "Example: 1,2,3 or 1,5,10"
+    echo ""
+    
+    while true; do
+        read -p "Select scripts: " user_input
+        echo ""
+        
+        if [ -z "$user_input" ]; then
+            echo "❌ Please enter at least one script number."
+            echo ""
+            continue
+        fi
+        
+        # Parse comma-separated numbers
+        local valid_selection=true
+        IFS=',' read -ra numbers <<< "$user_input"
+        
+        for num in "${numbers[@]}"; do
+            # Remove whitespace
+            num=$(echo "$num" | tr -d '[:space:]')
+            
+            # Check if it's a valid number
+            if ! [[ "$num" =~ ^[0-9]+$ ]]; then
+                echo "❌ Invalid number: $num"
+                valid_selection=false
+                continue
+            fi
+            
+            # Check if number is in range
+            if [ "$num" -lt 1 ] || [ "$num" -gt ${#all_scripts[@]} ]; then
+                echo "❌ Number $num is out of range (1-${#all_scripts[@]})"
+                valid_selection=false
+                continue
+            fi
+            
+            # Add to selected scripts (convert to 0-based index)
+            local script_index=$((num - 1))
+            selected_scripts+=("${all_scripts[$script_index]}")
+        done
+        
+        if [ "$valid_selection" = true ] && [ ${#selected_scripts[@]} -gt 0 ]; then
+            break
+        else
+            echo "Please try again."
+            echo ""
+            selected_scripts=()
+        fi
+    done
+    
+    # Export selected scripts as space-separated string (will be converted to array in install script)
+    export SELECTED_SCRIPTS="${selected_scripts[*]}"
+    
+    echo "✓ Selected scripts:"
+    for script in "${selected_scripts[@]}"; do
+        echo "   - $script"
+    done
+    echo ""
+}
+
+# ────────────────────────────────
+# Run Installation Based on Action
 # ────────────────────────────────
 
 INSTALL_SCRIPT="$SCRIPT_DIR/$PLATFORM/scripts/enviroment/00-install-all.sh"
@@ -352,6 +297,17 @@ INSTALL_SCRIPT="$SCRIPT_DIR/$PLATFORM/scripts/enviroment/00-install-all.sh"
 if [ ! -f "$INSTALL_SCRIPT" ]; then
     echo "❌ Error: Installation script not found at $INSTALL_SCRIPT"
     exit 1
+fi
+
+# Export action for the install script
+export INSTALL_ACTION
+
+# Handle different actions
+if [ "$INSTALL_ACTION" = "select" ]; then
+    select_scripts_to_run
+    export SELECTED_SCRIPTS
+elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    export FORCE_REINSTALL=true
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -368,6 +324,15 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "✅ Installation completed!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
+
+# ────────────────────────────────
+# Populate AWS Accounts After Installation
+# ────────────────────────────────
+
+# Try to populate AWS accounts if AWS was configured
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    populate_aws_accounts "$SCRIPT_DIR/.env"
+fi
 
 # ────────────────────────────────
 # Final Instructions
@@ -449,7 +414,7 @@ print_final_instructions() {
     echo "   3. Select scope: 'repo' (for private repositories)"
     echo ""
     echo "   4. Configure it:"
-    echo "      bash $SCRIPT_DIR/$PLATFORM/scripts/enviroment/22-configure-github-token.sh"
+    echo "      bash $SCRIPT_DIR/$PLATFORM/scripts/enviroment/21-configure-github-token.sh"
     echo ""
     echo "   Or add manually to ~/.zshrc:"
     echo "      export GITHUB_TOKEN=your_token_here"

@@ -6,9 +6,18 @@ echo "=============================================="
 echo "========= [12] CONFIGURING SSH =============="
 echo "=============================================="
 
-echo "Installing OpenSSH and xclip..."
-sudo apt update -y
-sudo apt install -y openssh-client xclip
+# Check if OpenSSH is installed (usually pre-installed on macOS)
+if ! command -v ssh &> /dev/null; then
+    echo "OpenSSH not found. Installing via Homebrew..."
+    if ! command -v brew &> /dev/null; then
+        echo "❌ Homebrew is not installed. Please install Homebrew first:"
+        echo "   /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        exit 1
+    fi
+    brew install openssh
+else
+    echo "✓ OpenSSH is already installed"
+fi
 
 # Validate email from .env
 if [ -z "$GIT_USER_EMAIL" ]; then
@@ -19,21 +28,32 @@ fi
 echo "Generating SSH key with email: $GIT_USER_EMAIL"
 if [ ! -f ~/.ssh/id_ed25519 ]; then
   ssh-keygen -t ed25519 -C "$GIT_USER_EMAIL" -f ~/.ssh/id_ed25519 -N ""
+  echo "✓ SSH key generated"
 else
-  echo "SSH key already exists."
+  echo "✓ SSH key already exists"
 fi
 
 echo "Starting SSH agent..."
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
+eval "$(ssh-agent -s)" > /dev/null
+ssh-add ~/.ssh/id_ed25519 2>/dev/null || echo "⚠️  Key may already be added to agent"
 
 echo "Setting correct permissions..."
 chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_ed25519
-chmod 644 ~/.ssh/id_ed25519.pub
+chmod 600 ~/.ssh/id_ed25519 2>/dev/null || true
+chmod 644 ~/.ssh/id_ed25519.pub 2>/dev/null || true
 
 echo "Copying public key to clipboard..."
-cat ~/.ssh/id_ed25519.pub | xclip -sel clip
+# Use pbcopy on macOS instead of xclip
+if command -v pbcopy &> /dev/null; then
+    cat ~/.ssh/id_ed25519.pub | pbcopy
+    echo "✓ Public key copied to clipboard"
+else
+    echo "⚠️  pbcopy not available, displaying public key:"
+    echo ""
+    cat ~/.ssh/id_ed25519.pub
+    echo ""
+    echo "Please copy the key above manually"
+fi
 
 echo "=============================================="
 echo "============== [12] DONE ===================="

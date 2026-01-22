@@ -3,7 +3,7 @@
 set -e
 
 echo "=============================================="
-echo "========= [08] INSTALLING JETBRAINS FONT ====="
+echo "======== [08] INSTALLING CASKAYDIA FONT ======"
 echo "=============================================="
 
 # Install required packages
@@ -11,15 +11,15 @@ echo "Installing required packages (wget, unzip, fontconfig)..."
 sudo apt update -y
 sudo apt install -y wget unzip fontconfig
 
-FONT_DIR="$HOME/.local/share/fonts/JetBrainsMono"
+FONT_DIR="$HOME/.local/share/fonts/CascadiaCode"
 mkdir -p "$FONT_DIR"
 
-echo "Downloading JetBrainsMono Nerd Font..."
-wget -q https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+echo "Downloading CascadiaCode Nerd Font..."
+wget -q https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip
 
 echo "Extracting font..."
-unzip -o JetBrainsMono.zip -d "$FONT_DIR" > /dev/null
-rm JetBrainsMono.zip
+unzip -o CascadiaCode.zip -d "$FONT_DIR" > /dev/null
+rm CascadiaCode.zip
 
 echo "Updating font cache..."
 fc-cache -fv

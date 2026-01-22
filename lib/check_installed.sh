@@ -17,7 +17,9 @@ check_installed() {
     fi
 
     # Check macOS Applications directory
-    if [ -d "/Applications/${tool}.app" ] || [ -d "/Applications/${tool^}.app" ]; then
+    # Capitalize first letter (bash 3.2 compatible)
+    tool_capitalized=$(echo "$tool" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+    if [ -d "/Applications/${tool}.app" ] || [ -d "/Applications/${tool_capitalized}.app" ]; then
         return 0
     fi
 
@@ -73,7 +75,20 @@ check_script_installed() {
             check_installed "lazygit" || return 1
             ;;
         "08-install-font-jetbrains.sh")
-            # Fonts are harder to check, skip for now
+            # Check if CaskaydiaCove Nerd Font is installed
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS: check Homebrew or font directory
+                if brew list --cask font-caskaydia-cove-nerd-font &>/dev/null 2>&1; then
+                    return 0
+                elif [ -d "$HOME/Library/Fonts/CascadiaCode" ]; then
+                    return 0
+                fi
+            else
+                # Linux: check font directory
+                if [ -d "$HOME/.local/share/fonts/CascadiaCode" ]; then
+                    return 0
+                fi
+            fi
             return 1
             ;;
         "09-install-cursor.sh")
@@ -94,37 +109,37 @@ check_script_installed() {
             # Configuration script, always run
             return 1
             ;;
-        "15-configure-cursor.sh")
+        "14-configure-cursor.sh")
             # Configuration script, always run
             return 1
             ;;
-        "16-install-docker.sh")
+        "15-install-docker.sh")
             check_installed "docker" || return 1
             ;;
-        "17-install-aws-vpn-client.sh")
+        "16-install-aws-vpn-client.sh")
             check_installed "aws-vpn-client" || return 1
             ;;
-        "18-install-aws-cli.sh")
+        "17-install-aws-cli.sh")
             check_installed "aws" || return 1
             ;;
-        "19-configure-aws-sso.sh")
+        "18-configure-aws-sso.sh")
             # Configuration script, always run
             return 1
             ;;
-        "20-install-dotnet.sh")
+        "19-install-dotnet.sh")
             check_installed "dotnet" || return 1
             ;;
-        "21-install-java.sh")
+        "20-install-java.sh")
             check_installed "java" || return 1
             ;;
-        "22-configure-github-token.sh")
+        "21-configure-github-token.sh")
             # Configuration script, always run
             return 1
             ;;
-        "23-install-insomnia.sh")
+        "22-install-insomnia.sh")
             check_installed "insomnia" || [ -d "/Applications/Insomnia.app" ] || return 1
             ;;
-        "24-install-tableplus.sh")
+        "23-install-tableplus.sh")
             check_installed "tableplus" || [ -d "/Applications/TablePlus.app" ] || return 1
             ;;
         *)

@@ -3,7 +3,7 @@
 set -e
 
 echo "=============================================="
-echo "========= [16] INSTALLING DOCKER ============="
+echo "========= [15] INSTALLING DOCKER ============="
 echo "=============================================="
 
 echo "Updating system..."
@@ -39,7 +39,7 @@ echo "Adding current user to docker group..."
 sudo usermod -aG docker $USER
 
 echo "=============================================="
-echo "============== [16] DONE ===================="
+echo "============== [15] DONE ===================="
 echo "=============================================="
 echo "⚠️  Logout/Login required to use Docker without sudo"
 echo ""

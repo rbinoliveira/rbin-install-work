@@ -73,4 +73,4 @@ fi
 echo "=============================================="
 echo "============== [10] DONE ===================="
 echo "=============================================="
-echo "▶ Next, run: bash 10-configure-file-watchers.sh"
+echo "▶ Next, run: bash 11-configure-terminal.sh"

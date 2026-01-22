@@ -23,7 +23,7 @@ download_config() {
 }
 
 echo "=============================================="
-echo "========= [15] CONFIGURING CURSOR ============"
+echo "========= [14] CONFIGURING CURSOR ============"
 echo "=============================================="
 
 # Determine Cursor user directory based on OS
@@ -67,9 +67,9 @@ else
 fi
 
 echo "=============================================="
-echo "============== [15] DONE ===================="
+echo "============== [14] DONE ===================="
 echo "=============================================="
 echo "🎉 Cursor configured successfully!"
 echo "   Open Cursor again to apply everything."
 echo ""
-echo "▶ Next, run: bash 16-install-docker.sh (final step)"
+echo "▶ Next, run: bash 15-install-docker.sh"

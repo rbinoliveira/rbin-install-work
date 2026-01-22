@@ -61,12 +61,17 @@ get_aws_sso_start_url() {
     
     # Try sso-session first
     local sso_url
-    sso_url=$(awk '/^\[sso-session /,/^\[/ {
-        if (/sso_start_url/) {
-            gsub(/sso_start_url[[:space:]]*=[[:space:]]*/, "", $0)
-            print $0
-            exit
-        }
+    sso_url=$(awk '/^\[sso-session / {
+        in_section = 1
+        next
+    }
+    in_section && /^\[/ && !/^\[sso-session / {
+        in_section = 0
+    }
+    in_section && /sso_start_url/ {
+        gsub(/sso_start_url[[:space:]]*=[[:space:]]*/, "", $0)
+        print $0
+        exit
     }' "$config_file")
     
     # If not found, try default profile
@@ -96,12 +101,17 @@ get_aws_sso_region() {
     
     # Try sso-session first
     local sso_region
-    sso_region=$(awk '/^\[sso-session /,/^\[/ {
-        if (/sso_region/) {
-            gsub(/sso_region[[:space:]]*=[[:space:]]*/, "", $0)
-            print $0
-            exit
-        }
+    sso_region=$(awk '/^\[sso-session / {
+        in_section = 1
+        next
+    }
+    in_section && /^\[/ && !/^\[sso-session / {
+        in_section = 0
+    }
+    in_section && /sso_region/ {
+        gsub(/sso_region[[:space:]]*=[[:space:]]*/, "", $0)
+        print $0
+        exit
     }' "$config_file")
     
     # If not found, try default profile
@@ -157,10 +167,11 @@ get_aws_env_variables() {
         if [[ "$line" =~ ^\[profile\ (.+)\]$ ]]; then
             profiles_array+=("${BASH_REMATCH[1]}")
         fi
-    done < <(grep -E '^\[profile ' "$config_file")
+    done < <(grep -E '^\[profile ' "$config_file" 2>/dev/null || true)
     
     # Process profiles
     local account_num=1
+    local found_accounts=false
     
     # Default profile first
     if grep -q "^\[default\]" "$config_file"; then
@@ -174,6 +185,7 @@ get_aws_env_variables() {
             echo "AWS_ACCOUNT_${account_num}_PROFILE=default"
             echo ""
             account_num=$((account_num + 1))
+            found_accounts=true
         fi
     fi
     
@@ -189,8 +201,77 @@ get_aws_env_variables() {
             echo "AWS_ACCOUNT_${account_num}_PROFILE=$profile_name"
             echo ""
             account_num=$((account_num + 1))
+            found_accounts=true
         fi
     done
+    
+    # If no accounts found but SSO is configured, try to discover accounts
+    if [ "$found_accounts" = false ] && [ -n "$sso_start_url" ]; then
+        # Try to list accounts if already logged in
+        local sso_session_name="default"
+        if grep -q "^\[sso-session" "$config_file"; then
+            sso_session_name=$(grep "^\[sso-session" "$config_file" | head -1 | sed 's/\[sso-session //;s/\]//')
+        fi
+        
+        # Check if we can list accounts (means we're logged in)
+        if command -v aws &> /dev/null; then
+            local accounts_output
+            accounts_output=$(aws sso list-accounts --sso-session "$sso_session_name" 2>&1)
+            
+            if [ $? -eq 0 ] && echo "$accounts_output" | grep -q "accountId"; then
+                echo "# ⚠️  No AWS account profiles found in ~/.aws/config"
+                echo "#"
+                echo "# However, you appear to be logged in to AWS SSO."
+                echo "# To create profiles, you can either:"
+                echo "#"
+                echo "# Option 1: Use AWS CLI interactive configuration:"
+                echo "#   aws configure sso"
+                echo "#"
+                echo "# Option 2: Manually add profiles to ~/.aws/config with format:"
+                echo "#   [profile profile-name]"
+                echo "#   sso_session = $sso_session_name"
+                echo "#   sso_account_id = <account-id>"
+                echo "#   sso_role_name = <role-name>"
+                echo "#   region = $sso_region"
+                echo "#"
+                echo "# You can discover available accounts and roles with:"
+                echo "#   aws sso list-accounts --sso-session $sso_session_name"
+                echo "#   aws sso list-account-roles --sso-session $sso_session_name --account-id <account-id>"
+            else
+                echo "# ⚠️  No AWS account profiles found in ~/.aws/config"
+                echo "#"
+                echo "# To create profiles, you need to:"
+                echo "#"
+                echo "# 1. Login to AWS SSO:"
+                if [ -n "$sso_session_name" ]; then
+                    echo "#   aws sso login --sso-session $sso_session_name"
+                else
+                    echo "#   aws sso login --sso-session default"
+                fi
+                echo "#"
+                echo "# 2. Then configure profiles using:"
+                echo "#   aws configure sso"
+                echo "#"
+                echo "# Or manually add profiles to ~/.aws/config"
+            fi
+        else
+            echo "# ⚠️  No AWS account profiles found in ~/.aws/config"
+            echo "#"
+            echo "# To create profiles, you need to:"
+            echo "#"
+            echo "# 1. Login to AWS SSO:"
+            if [ -n "$sso_session_name" ]; then
+                echo "#   aws sso login --sso-session $sso_session_name"
+            else
+                echo "#   aws sso login --sso-session default"
+            fi
+            echo "#"
+            echo "# 2. Then configure profiles using:"
+            echo "#   aws configure sso"
+            echo "#"
+            echo "# Or manually add profiles to ~/.aws/config"
+        fi
+    fi
 }
 
 # ────────────────────────────────────────────────────────────────

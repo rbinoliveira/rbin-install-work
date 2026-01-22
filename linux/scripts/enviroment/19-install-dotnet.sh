@@ -3,23 +3,27 @@
 set -e
 
 echo "=============================================="
-echo "========= [21] INSTALLING DOTNET 8 ==========="
+echo "========= [19] INSTALLING DOTNET 9 ==========="
 echo "=============================================="
+
+# .NET version to install (current LTS)
+DOTNET_VERSION="9"
 
 # Check if .NET is already installed
 if command -v dotnet &> /dev/null; then
     CURRENT_VERSION=$(dotnet --version 2>/dev/null | head -n 1)
     MAJOR_VERSION=$(echo "$CURRENT_VERSION" | cut -d. -f1)
 
-    if [ "$MAJOR_VERSION" = "8" ]; then
-        echo "✓ .NET 8 is already installed (version: $CURRENT_VERSION)"
+    if [ "$MAJOR_VERSION" = "$DOTNET_VERSION" ]; then
+        echo "✓ .NET ${DOTNET_VERSION} is already installed (version: $CURRENT_VERSION)"
         echo "Skipping installation..."
+        exit 0
     else
-        echo "⚠️  .NET $MAJOR_VERSION is installed, but .NET 8 is required"
-        echo "Installing .NET 8..."
+        echo "⚠️  .NET $MAJOR_VERSION is installed, but .NET ${DOTNET_VERSION} is required"
+        echo "Installing .NET ${DOTNET_VERSION}..."
     fi
 else
-    echo "Installing .NET SDK 8..."
+    echo "Installing .NET SDK ${DOTNET_VERSION}..."
 fi
 
 # Detect Ubuntu version
@@ -44,9 +48,9 @@ rm /tmp/packages-microsoft-prod.deb
 echo "Updating package list..."
 sudo apt-get update -y
 
-# Install .NET SDK 8
-echo "Installing .NET SDK 8.0..."
-sudo apt-get install -y dotnet-sdk-8.0
+# Install .NET SDK 9
+echo "Installing .NET SDK ${DOTNET_VERSION}.0..."
+sudo apt-get install -y dotnet-sdk-${DOTNET_VERSION}.0
 
 # Verify installation
 if command -v dotnet &> /dev/null; then
@@ -63,6 +67,6 @@ else
 fi
 
 echo "=============================================="
-echo "============== [21] DONE ===================="
-echo "=============================================="
-echo "▶ Next, run: bash 21-install-java.sh"
+        echo "============== [19] DONE ===================="
+        echo "=============================================="
+        echo "▶ Next, run: bash 20-install-java.sh"

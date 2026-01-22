@@ -141,7 +141,7 @@ Installs Yarn via Corepack.
 Installs various development tools and utilities.
 
 #### **08-install-font-jetbrains.sh**
-Installs JetBrains Mono Nerd Font.
+Installs CaskaydiaCove Nerd Font.
 
 #### **09-install-cursor.sh**
 Installs Cursor Editor.
@@ -402,7 +402,7 @@ Instala Yarn via Corepack.
 Instala várias ferramentas e utilitários de desenvolvimento.
 
 #### **08-install-font-jetbrains.sh**
-Instala a fonte JetBrains Mono Nerd Font.
+Instala a fonte CaskaydiaCove Nerd Font.
 
 #### **09-install-cursor.sh**
 Instala o Cursor Editor.

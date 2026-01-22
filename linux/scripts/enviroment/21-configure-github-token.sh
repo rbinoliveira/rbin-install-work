@@ -29,7 +29,7 @@ source "$ENV_FILE"
 set +a
 
 echo "=============================================="
-echo "===== [22] CONFIGURING GITHUB TOKEN =========="
+echo "===== [21] CONFIGURING GITHUB TOKEN =========="
 echo "=============================================="
 
 echo "This script will help you configure the GITHUB_TOKEN"
@@ -100,7 +100,7 @@ echo "   - Keep your token secure and don't share it"
 echo ""
 
 echo "=============================================="
-echo "============== [22] DONE ===================="
+echo "============== [21] DONE ===================="
 echo "=============================================="
 echo "🎉 GitHub token configuration complete!"
 echo ""

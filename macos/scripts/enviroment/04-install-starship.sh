@@ -27,7 +27,21 @@ echo "========= [04] INSTALLING STARSHIP ==========="
 echo "=============================================="
 
 echo "Installing Starship prompt..."
-curl -sS https://starship.rs/install.sh | sh
+
+# Check if Starship is already installed
+if command -v starship &> /dev/null; then
+    echo "✓ Starship is already installed: $(starship --version)"
+else
+    # Try Homebrew first (recommended for macOS, especially ARM64)
+    if command -v brew &> /dev/null; then
+        echo "Installing Starship via Homebrew..."
+        brew install starship
+    else
+        # Fallback to official install script
+        echo "Homebrew not found, using official install script..."
+        curl -sS https://starship.rs/install.sh | sh
+    fi
+fi
 
 echo "Copying starship.toml..."
 mkdir -p ~/.config

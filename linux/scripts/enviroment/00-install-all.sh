@@ -53,85 +53,38 @@ if [ -f "$PROJECT_ROOT/lib/apt_helper.sh" ]; then
     source "$PROJECT_ROOT/lib/apt_helper.sh"
 fi
 
-# Load environment variables from .env file if it exists
-if [ -f "$ENV_FILE" ]; then
-    echo "📝 Loading configuration from .env file..."
-    # Source the .env file, ignoring comments and empty lines
-    set -a
-    while IFS= read -r line || [ -n "$line" ]; do
-        # Skip comments and empty lines
-        [[ "$line" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "${line// }" ]] && continue
-        # Export the variable
-        eval "export $line" 2>/dev/null || true
-    done < "$ENV_FILE"
-    set +a
-    echo "✓ Configuration loaded from .env"
-elif [ -f "$ENV_EXAMPLE" ]; then
-    echo "📝 .env file not found. Creating from .env.example..."
-    cp "$ENV_EXAMPLE" "$ENV_FILE"
-    echo "✓ Created .env file from template"
-    echo ""
-    echo "⚠️  Please edit .env file with your information:"
-    echo "   $ENV_FILE"
-    echo ""
-    echo "   Or run: bash setup-env.sh"
-    echo ""
-    read -p "Press Enter after editing .env file to continue, or Ctrl+C to cancel..."
-    # Reload after user edits
-    set -a
-    while IFS= read -r line || [ -n "$line" ]; do
-        # Skip comments and empty lines
-        [[ "$line" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "${line// }" ]] && continue
-        # Export the variable
-        eval "export $line" 2>/dev/null || true
-    done < "$ENV_FILE"
-    set +a
-fi
-
-# Validate required configuration from .env
-echo "📝 Validating configuration from .env file..."
-echo ""
-
-# Check Git user name
-if [ -z "$GIT_USER_NAME" ] || [ "$GIT_USER_NAME" = "Your Name" ]; then
-    echo "❌ GIT_USER_NAME is required in .env file"
-    echo "   Please set GIT_USER_NAME in: $ENV_FILE"
+# Load environment validator library
+if [ -f "$PROJECT_ROOT/lib/env_validator.sh" ]; then
+    source "$PROJECT_ROOT/lib/env_validator.sh"
+else
+    echo "❌ Error: env_validator.sh library not found!"
+    echo "   Expected location: $PROJECT_ROOT/lib/env_validator.sh"
     exit 1
 fi
 
-# Check Git email
-if [ -z "$GIT_USER_EMAIL" ] || [ "$GIT_USER_EMAIL" = "your.email@example.com" ]; then
-    echo "❌ GIT_USER_EMAIL is required in .env file"
-    echo "   Please set GIT_USER_EMAIL in: $ENV_FILE"
+# Validate and collect required environment variables
+if ! validate_required_env_variables "$ENV_FILE" "$ENV_EXAMPLE"; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "❌ Environment validation failed!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Installation cannot proceed without required variables."
+    echo "Please check your .env file: $ENV_FILE"
+    echo ""
     exit 1
 fi
 
-# GitHub token is optional, no validation needed
+# Load environment variables
+load_env_file "$ENV_FILE"
 
 # Export variables for child scripts
 export GIT_USER_NAME
 export GIT_USER_EMAIL
 export GITHUB_TOKEN
+export AWS_SSO_START_URL
+export AWS_SSO_REGION
 export INSTALL_ALL_RUNNING=1
-
-echo ""
-echo "=============================================="
-echo "Configuration summary:"
-echo "  Git Name: $GIT_USER_NAME"
-echo "  Git Email: $GIT_USER_EMAIL"
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "  GitHub Token: ${GITHUB_TOKEN:0:10}... (configured)"
-else
-    echo "  GitHub Token: (not configured)"
-fi
-echo "=============================================="
-echo ""
-echo "⚠️  ATTENTION:"
-echo "   - After Docker installation (final step), you may need to"
-echo "     logout/login to use Docker without sudo (Linux only)."
-echo ""
 
 # Part 1: Initial setup (01-02)
 echo ""
@@ -149,27 +102,70 @@ for script in "${scripts_phase1[@]}"; do
   echo "Running: $script"
   echo "=============================================="
 
-  # Smart mode: check if already installed
-  if [ "$INSTALL_MODE" = "smart" ]; then
+  # Handle different installation actions
+  if [ "$INSTALL_ACTION" = "select" ]; then
+    # Convert SELECTED_SCRIPTS string to array
+    if [ -n "$SELECTED_SCRIPTS" ]; then
+      IFS=' ' read -ra SELECTED_ARRAY <<< "$SELECTED_SCRIPTS"
+    else
+      SELECTED_ARRAY=()
+    fi
+    # Check if this script is in the selected list
+    script_selected=false
+    for selected in "${SELECTED_ARRAY[@]}"; do
+      if [ "$selected" = "$script" ]; then
+        script_selected=true
+        break
+      fi
+    done
+    if [ "$script_selected" = false ]; then
+      echo "⏭️  Skipping $script (not selected)"
+      continue
+    fi
+  elif [ "$INSTALL_ACTION" = "smart" ]; then
+    # Smart mode: check if already installed
     if check_script_installed "$script"; then
       echo "✓ $script is already installed/configured. Skipping..."
       continue
     fi
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    # Reinstall all: force reinstall
+    echo "🔄 Reinstalling $script..."
   fi
 
-  # Always ask user if they want to run/install
-  if [ -t 0 ]; then  # Check if running interactively
-    read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-      echo "Skipping $script"
-      continue
+  # In smart mode, don't ask - just install automatically
+  if [ "$INSTALL_ACTION" = "smart" ]; then
+    echo "Installing/running $script (smart mode - automatic)..."
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    echo "Installing/running $script (reinstall mode)..."
+  elif [ "$INSTALL_ACTION" = "select" ]; then
+    # For select mode, ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
     else
-      echo "Installing/running $script..."
+      echo "Installing/running $script (non-interactive mode)..."
     fi
   else
-    # Non-interactive mode - run automatically
-    echo "Installing/running $script (non-interactive mode)..."
+    # Default: ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
+    else
+      echo "Installing/running $script (non-interactive mode)..."
+    fi
   fi
 
   if bash "$SCRIPT_DIR/$script"; then
@@ -208,27 +204,70 @@ for script in "${scripts_phase2[@]}"; do
   echo "Running: $script"
   echo "=============================================="
 
-  # Smart mode: check if already installed
-  if [ "$INSTALL_MODE" = "smart" ]; then
+  # Handle different installation actions
+  if [ "$INSTALL_ACTION" = "select" ]; then
+    # Convert SELECTED_SCRIPTS string to array
+    if [ -n "$SELECTED_SCRIPTS" ]; then
+      IFS=' ' read -ra SELECTED_ARRAY <<< "$SELECTED_SCRIPTS"
+    else
+      SELECTED_ARRAY=()
+    fi
+    # Check if this script is in the selected list
+    script_selected=false
+    for selected in "${SELECTED_ARRAY[@]}"; do
+      if [ "$selected" = "$script" ]; then
+        script_selected=true
+        break
+      fi
+    done
+    if [ "$script_selected" = false ]; then
+      echo "⏭️  Skipping $script (not selected)"
+      continue
+    fi
+  elif [ "$INSTALL_ACTION" = "smart" ]; then
+    # Smart mode: check if already installed
     if check_script_installed "$script"; then
       echo "✓ $script is already installed/configured. Skipping..."
       continue
     fi
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    # Reinstall all: force reinstall
+    echo "🔄 Reinstalling $script..."
   fi
 
-  # Always ask user if they want to run/install
-  if [ -t 0 ]; then  # Check if running interactively
-    read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-      echo "Skipping $script"
-      continue
+  # In smart mode, don't ask - just install automatically
+  if [ "$INSTALL_ACTION" = "smart" ]; then
+    echo "Installing/running $script (smart mode - automatic)..."
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    echo "Installing/running $script (reinstall mode)..."
+  elif [ "$INSTALL_ACTION" = "select" ]; then
+    # For select mode, ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
     else
-      echo "Installing/running $script..."
+      echo "Installing/running $script (non-interactive mode)..."
     fi
   else
-    # Non-interactive mode - run automatically
-    echo "Installing/running $script (non-interactive mode)..."
+    # Default: ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
+    else
+      echo "Installing/running $script (non-interactive mode)..."
+    fi
   fi
 
   if bash "$SCRIPT_DIR/$script"; then
@@ -269,27 +308,70 @@ for script in "${scripts[@]}"; do
   echo "Running: $script"
   echo "=============================================="
 
-  # Smart mode: check if already installed
-  if [ "$INSTALL_MODE" = "smart" ]; then
+  # Handle different installation actions
+  if [ "$INSTALL_ACTION" = "select" ]; then
+    # Convert SELECTED_SCRIPTS string to array
+    if [ -n "$SELECTED_SCRIPTS" ]; then
+      IFS=' ' read -ra SELECTED_ARRAY <<< "$SELECTED_SCRIPTS"
+    else
+      SELECTED_ARRAY=()
+    fi
+    # Check if this script is in the selected list
+    script_selected=false
+    for selected in "${SELECTED_ARRAY[@]}"; do
+      if [ "$selected" = "$script" ]; then
+        script_selected=true
+        break
+      fi
+    done
+    if [ "$script_selected" = false ]; then
+      echo "⏭️  Skipping $script (not selected)"
+      continue
+    fi
+  elif [ "$INSTALL_ACTION" = "smart" ]; then
+    # Smart mode: check if already installed
     if check_script_installed "$script"; then
       echo "✓ $script is already installed/configured. Skipping..."
       continue
     fi
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    # Reinstall all: force reinstall
+    echo "🔄 Reinstalling $script..."
   fi
 
-  # Always ask user if they want to run/install
-  if [ -t 0 ]; then  # Check if running interactively
-    read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-      echo "Skipping $script"
-      continue
+  # In smart mode, don't ask - just install automatically
+  if [ "$INSTALL_ACTION" = "smart" ]; then
+    echo "Installing/running $script (smart mode - automatic)..."
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    echo "Installing/running $script (reinstall mode)..."
+  elif [ "$INSTALL_ACTION" = "select" ]; then
+    # For select mode, ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
     else
-      echo "Installing/running $script..."
+      echo "Installing/running $script (non-interactive mode)..."
     fi
   else
-    # Non-interactive mode - run automatically
-    echo "Installing/running $script (non-interactive mode)..."
+    # Default: ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
+    else
+      echo "Installing/running $script (non-interactive mode)..."
+    fi
   fi
 
   # Before each script, reload NVM if it exists
@@ -328,16 +410,16 @@ scripts=(
   "11-configure-terminal.sh"
   "12-configure-ssh.sh"
   "13-configure-inotify.sh"
-  "15-configure-cursor.sh"
-  "16-install-docker.sh"
-  "17-install-aws-vpn-client.sh"
-  "18-install-aws-cli.sh"
-  "19-configure-aws-sso.sh"
-  "20-install-dotnet.sh"
-  "21-install-java.sh"
-  "22-configure-github-token.sh"
-  "23-install-insomnia.sh"
-  "24-install-tableplus.sh"
+  "14-configure-cursor.sh"
+  "15-install-docker.sh"
+  "16-install-aws-vpn-client.sh"
+  "17-install-aws-cli.sh"
+  "18-configure-aws-sso.sh"
+  "19-install-dotnet.sh"
+  "20-install-java.sh"
+  "21-configure-github-token.sh"
+  "22-install-insomnia.sh"
+  "23-install-tableplus.sh"
 )
 
 for script in "${scripts[@]}"; do
@@ -345,27 +427,70 @@ for script in "${scripts[@]}"; do
   echo "Running: $script"
   echo "=============================================="
 
-  # Smart mode: check if already installed
-  if [ "$INSTALL_MODE" = "smart" ]; then
+  # Handle different installation actions
+  if [ "$INSTALL_ACTION" = "select" ]; then
+    # Convert SELECTED_SCRIPTS string to array
+    if [ -n "$SELECTED_SCRIPTS" ]; then
+      IFS=' ' read -ra SELECTED_ARRAY <<< "$SELECTED_SCRIPTS"
+    else
+      SELECTED_ARRAY=()
+    fi
+    # Check if this script is in the selected list
+    script_selected=false
+    for selected in "${SELECTED_ARRAY[@]}"; do
+      if [ "$selected" = "$script" ]; then
+        script_selected=true
+        break
+      fi
+    done
+    if [ "$script_selected" = false ]; then
+      echo "⏭️  Skipping $script (not selected)"
+      continue
+    fi
+  elif [ "$INSTALL_ACTION" = "smart" ]; then
+    # Smart mode: check if already installed
     if check_script_installed "$script"; then
       echo "✓ $script is already installed/configured. Skipping..."
       continue
     fi
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    # Reinstall all: force reinstall
+    echo "🔄 Reinstalling $script..."
   fi
 
-  # Always ask user if they want to run/install
-  if [ -t 0 ]; then  # Check if running interactively
-    read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-      echo "Skipping $script"
-      continue
+  # In smart mode, don't ask - just install automatically
+  if [ "$INSTALL_ACTION" = "smart" ]; then
+    echo "Installing/running $script (smart mode - automatic)..."
+  elif [ "$INSTALL_ACTION" = "reinstall" ]; then
+    echo "Installing/running $script (reinstall mode)..."
+  elif [ "$INSTALL_ACTION" = "select" ]; then
+    # For select mode, ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
     else
-      echo "Installing/running $script..."
+      echo "Installing/running $script (non-interactive mode)..."
     fi
   else
-    # Non-interactive mode - run automatically
-    echo "Installing/running $script (non-interactive mode)..."
+    # Default: ask user
+    if [ -t 0 ]; then
+      read -p "Do you want to install/run $script? [Y/n]: " -n 1 -r
+      echo ""
+      if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $script"
+        continue
+      else
+        echo "Installing/running $script..."
+      fi
+    else
+      echo "Installing/running $script (non-interactive mode)..."
+    fi
   fi
 
   # Before each script, reload NVM if it exists

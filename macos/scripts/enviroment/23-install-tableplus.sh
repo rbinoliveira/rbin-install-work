@@ -3,7 +3,7 @@
 set -e
 
 echo "=============================================="
-echo "========= [24] INSTALLING TABLEPLUS =========="
+echo "========= [23] INSTALLING TABLEPLUS =========="
 echo "=============================================="
 
 # Check if TablePlus is already installed
@@ -107,7 +107,7 @@ fi
 
 echo ""
 echo "=============================================="
-echo "============== [24] DONE ===================="
+echo "============== [23] DONE ===================="
 echo "=============================================="
 echo ""
 echo "📝 TablePlus is a modern database management tool for:"
