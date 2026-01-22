@@ -74,7 +74,7 @@ check_script_installed() {
             check_installed "lsd" && \
             check_installed "lazygit" || return 1
             ;;
-        "08-install-font-jetbrains.sh")
+        "08-install-font-caskaydia.sh")
             # Check if CaskaydiaCove Nerd Font is installed
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 # macOS: check Homebrew or font directory

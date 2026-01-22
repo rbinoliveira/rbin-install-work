@@ -300,7 +300,7 @@ scripts=(
   "05-install-node-nvm.sh"
   "06-install-yarn.sh"
   "07-install-tools.sh"
-  "08-install-font-jetbrains.sh"
+  "08-install-font-caskaydia.sh"
 )
 
 for script in "${scripts[@]}"; do

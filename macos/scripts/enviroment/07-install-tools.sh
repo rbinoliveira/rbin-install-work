@@ -146,5 +146,5 @@ echo "  ✓ lazygit - git TUI"
 echo "=============================================="
 echo "============== [07] DONE ===================="
 echo "=============================================="
-echo "▶ Next, run: bash 08-install-font-jetbrains.sh"
+echo "▶ Next, run: bash 08-install-font-caskaydia.sh"
 

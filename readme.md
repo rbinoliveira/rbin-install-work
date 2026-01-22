@@ -140,7 +140,7 @@ Installs Yarn via Corepack.
 #### **07-install-tools.sh**
 Installs various development tools and utilities.
 
-#### **08-install-font-jetbrains.sh**
+#### **08-install-font-caskaydia.sh**
 Installs CaskaydiaCove Nerd Font.
 
 #### **09-install-cursor.sh**
@@ -401,7 +401,7 @@ Instala Yarn via Corepack.
 #### **07-install-tools.sh**
 Instala várias ferramentas e utilitários de desenvolvimento.
 
-#### **08-install-font-jetbrains.sh**
+#### **08-install-font-caskaydia.sh**
 Instala a fonte CaskaydiaCove Nerd Font.
 
 #### **09-install-cursor.sh**
